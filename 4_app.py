@@ -1,20 +1,19 @@
 import streamlit as st
 import pandas as pd
 import pickle
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Car Price Prediction", layout="centered")
 
 st.title("🚗 Car Price Prediction App")
 st.write("Predict car prices using **Multiple Linear Regression**")
 
-# Load model safely
+# Load trained model and preprocessor
 try:
     with open("model.pkl", "rb") as file:
         model, preprocessor = pickle.load(file)
     st.success("✅ Model loaded successfully")
 except Exception as e:
-    st.error("❌ Model could not be loaded")
+    st.error("❌ Failed to load model")
     st.exception(e)
     st.stop()
 
@@ -27,7 +26,7 @@ brand = st.selectbox(
 mileage = st.slider("Mileage (km/l)", 10, 30, 18)
 engine_size = st.slider("Engine Size (cc)", 800, 3000, 1500)
 
-# Prediction
+# Predict button
 if st.button("Predict Price"):
     try:
         input_df = pd.DataFrame({
@@ -41,7 +40,7 @@ if st.button("Predict Price"):
 
         st.success(f"💰 Estimated Car Price: ₹ {int(prediction[0]):,}")
 
-        # Feature importance
+        # Display feature importance as table
         feature_names = (
             preprocessor.named_transformers_["brand"]
             .get_feature_names_out(["Brand"])
@@ -49,12 +48,13 @@ if st.button("Predict Price"):
             + ["Mileage", "Engine_Size"]
         )
 
-        coeffs = model.coef_
+        feature_importance = pd.DataFrame({
+            "Feature": feature_names,
+            "Coefficient": model.coef_
+        }).sort_values(by="Coefficient", ascending=False)
 
-        fig, ax = plt.subplots()
-        ax.barh(feature_names, coeffs)
-        ax.set_title("Feature Importance (Regression Coefficients)")
-        st.pyplot(fig)
+        st.subheader("📊 Feature Importance")
+        st.table(feature_importance)
 
     except Exception as e:
         st.error("❌ Error during prediction")
