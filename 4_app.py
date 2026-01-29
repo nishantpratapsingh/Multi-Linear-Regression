@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle
-
+import sklearn
 st.set_page_config(page_title="Car Price Prediction", layout="centered")
 
 st.title("🚗 Car Price Prediction App")
@@ -59,3 +59,4 @@ if st.button("Predict Price"):
     except Exception as e:
         st.error("❌ Error during prediction")
         st.exception(e)
+
